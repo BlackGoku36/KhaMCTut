@@ -18,6 +18,9 @@ class Mesh {
 
 	static var vertexBuffer:VertexBuffer;
 	static var indexBuffer:IndexBuffer;
+	static var structure: VertexStructure;
+	var structureLength = 6;
+
 	var pipeline:PipelineState;
 
 	var mvpID:ConstantLocation;
@@ -29,53 +32,16 @@ class Mesh {
 	var objectAlbedoC:ConstantLocation;
 	var objectAmbientOcclusionC:ConstantLocation;
 
-	static var vertices:Array<Float> = [
-		-1.0,-1.0,-1.0,
-		-1.0,-1.0, 1.0,
-		-1.0, 1.0, 1.0,
-			1.0, 1.0,-1.0,
-		-1.0,-1.0,-1.0,
-		-1.0, 1.0,-1.0,
-			1.0,-1.0, 1.0,
-		-1.0,-1.0,-1.0,
-			1.0,-1.0,-1.0,
-			1.0, 1.0,-1.0,
-			1.0,-1.0,-1.0,
-		-1.0,-1.0,-1.0,
-		-1.0,-1.0,-1.0,
-		-1.0, 1.0, 1.0,
-		-1.0, 1.0,-1.0,
-			1.0,-1.0, 1.0,
-		-1.0,-1.0, 1.0,
-		-1.0,-1.0,-1.0,
-		-1.0, 1.0, 1.0,
-		-1.0,-1.0, 1.0,
-			1.0,-1.0, 1.0,
-			1.0, 1.0, 1.0,
-			1.0,-1.0,-1.0,
-			1.0, 1.0,-1.0,
-			1.0,-1.0,-1.0,
-			1.0, 1.0, 1.0,
-			1.0,-1.0, 1.0,
-			1.0, 1.0, 1.0,
-			1.0, 1.0,-1.0,
-		-1.0, 1.0,-1.0,
-			1.0, 1.0, 1.0,
-		-1.0, 1.0,-1.0,
-		-1.0, 1.0, 1.0,
-			1.0, 1.0, 1.0,
-		-1.0, 1.0, 1.0,
-			1.0,-1.0, 1.0
-	];
-	static var indices:Array<Int> = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35];
-	public var normals:Array<Float> = [-4,0,0,-4,0,0,-4,0,0,-0,0,-4,-0,0,-4,-0,0,-4,0,-4,-0,0,-4,-0,0,-4,-0,0,-0,-4,0,-0,-4,0,-0,-4,-4,0,0,-4,0,0,-4,0,0,-0,-4,0,-0,-4,0,-0,-4,0,0,0,4,0,0,4,0,0,4,4,0,0,4,0,0,4,0,0,4,0,0,4,0,0,4,0,0,0,4,0,0,4,0,0,4,0,0,4,0,0,4,0,0,4,0,0,0,4,0,0,4,0,0,4];
+	public var vertices:Array<Float> = [];
+	public var indices:Array<Int> = [];
+	public var normals:Array<Float> = [];
 
 	public var lightPosition: FastVector3 = new FastVector3(1.0, 17.7, 1.0);
 
 	public var objectAlbedo: FastVector3 = new FastVector3(1.0, 0.5, 0.3);
 	public var objectAmbientOcclusion: FastFloat = 0.2;
 
-	public var lightColor = new FastVector3(100, 100, 100);
+	public var lightColor = new FastVector3(1, 1, 1);
 
 	public var cameraContoller: CameraController;
 
@@ -85,9 +51,7 @@ class Mesh {
 
 	public function load() {
 
-		var structureLength = 6;
-
-		var structure = new VertexStructure();
+		structure = new VertexStructure();
 		structure.add("pos", VertexData.Float3);
 		structure.add("nor", VertexData.Float3);
 
@@ -111,7 +75,7 @@ class Mesh {
 		lightPositionC = pipeline.getConstantLocation("lightPosition");
 		lightColorC = pipeline.getConstantLocation("lightColor");
 
-		vertexBuffer = new VertexBuffer(Std.int(vertices.length / 3), structure, Usage.StaticUsage);
+		vertexBuffer = new VertexBuffer(15, structure, Usage.StaticUsage);
 
 		var vbData = vertexBuffer.lock();
 		for (i in 0...Std.int(vbData.length / structureLength)) {
@@ -125,6 +89,26 @@ class Mesh {
 		vertexBuffer.unlock();
 
 		indexBuffer = new IndexBuffer(indices.length*2, Usage.StaticUsage);
+
+		var iData = indexBuffer.lock();
+		for (i in 0...iData.length) {
+			iData[i] = indices[i];
+		}
+		indexBuffer.unlock();
+	}
+
+	public function remesh() {
+
+		var vbData = vertexBuffer.lock();
+		for (i in 0...Std.int(vbData.length / structureLength)) {
+			vbData.set(i * structureLength, vertices[i * 3]);
+			vbData.set(i * structureLength + 1, vertices[i * 3 + 1]);
+			vbData.set(i * structureLength + 2, vertices[i * 3 + 2]);
+			vbData.set(i * structureLength + 3, normals[i * 3]);
+			vbData.set(i * structureLength + 4, normals[i * 3 + 1]);
+			vbData.set(i * structureLength + 5, normals[i * 3 + 2]);
+		}
+		vertexBuffer.unlock();
 
 		var iData = indexBuffer.lock();
 		for (i in 0...iData.length) {

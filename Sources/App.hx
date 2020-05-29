@@ -6,6 +6,7 @@ import kha.Framebuffer;
 class App {
 
 	public static var mesh:Mesh;
+	public static var mc:MarchingCubes;
 
 	var deltaTime:Float = 0.0;
 	var totalFrames:Int = 0;
@@ -15,13 +16,23 @@ class App {
 
 	static var onEndFrames: Array<Void->Void> = [];
 
+	var kb = Input.getKeyboard();
+
 	public function new() {
 		mesh = new Mesh();
+		mc = new MarchingCubes();
 		mesh.load();
 	}
 
 	public function update() {
 		mesh.update();
+
+		if(kb.started(Up)){
+			mc.configIndex +=1;
+			mc.clean();
+			mc.generate();
+			App.mesh.remesh();
+		}
 
 		if (onEndFrames != null) for (endFrames in onEndFrames) endFrames();
 	}
