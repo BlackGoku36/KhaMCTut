@@ -75,7 +75,7 @@ class Mesh {
 		lightPositionC = pipeline.getConstantLocation("lightPosition");
 		lightColorC = pipeline.getConstantLocation("lightColor");
 
-		vertexBuffer = new VertexBuffer(15, structure, Usage.StaticUsage);
+		vertexBuffer = new VertexBuffer(Std.int(vertices.length / 3)*2, structure, Usage.StaticUsage);
 
 		var vbData = vertexBuffer.lock();
 		for (i in 0...Std.int(vbData.length / structureLength)) {

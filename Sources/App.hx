@@ -28,7 +28,10 @@ class App {
 		mesh.update();
 
 		if(kb.started(Up)){
-			mc.configIndex +=1;
+			Volume.offset += 1;
+			Volume.makeTerrainVolume((vol)->{
+				MarchingCubes.vol = vol;
+			});
 			mc.clean();
 			mc.generate();
 			App.mesh.remesh();
