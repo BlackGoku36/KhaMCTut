@@ -1,7 +1,7 @@
 #version 450
 
 in vec4 pos;
-in vec4 nor;
+in vec2 nor;
 
 out vec3 normal;
 out vec3 fragPos;
